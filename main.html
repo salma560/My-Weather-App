@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <title>WeatherPro — Live Forecast</title>
+</head>
+<body>
+    <div class="app-background"></div>
+
+    <nav class="navbar glass-nav">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon-wrapper">
+                    <i class="fa-solid fa-cloud-sun"></i>
+                </div>
+                <span>Weather<span class="text-gradient">Pro</span></span>
+            </a>
+            <p class="nav-tagline">Accurate 3-day forecasts worldwide</p>
+        </div>
+    </nav>
+
+    <main class="main-content container">
+        <div class="search-container">
+            <div class="search-box glass-panel">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Enter the city" autocomplete="off">
+                <button type="button" id="searchBtn" class="btn-gradient">Search</button>
+            </div>
+        </div>
+
+        <section class="forecast-header">
+            <h2>3-Day Forecast</h2>
+            <span id="last-updated" class="last-updated">—</span>
+        </section>
+
+        <section class="weather-forecast" id="forecastSection">
+            <article class="forecast-card today glass-panel active-card">
+                <div class="card-header">
+                    <div>
+                        <span class="day" id="today-day">—</span>
+                        <span class="date" id="today-date">—</span>
+                    </div>
+                    <span class="badge badge-live">Live</span>
+                </div>
+                <div class="card-body">
+                    <h2 class="location" id="location-name">—</h2>
+                    <div class="current-weather">
+                        <div class="temp-block">
+                            <div class="temp">
+                                <span id="today-temp">—</span><span class="degree-sym">°</span><span class="celsius">C</span>
+                            </div>
+                            <p class="feels-like">Feels like <span id="today-feels">—</span>°C</p>
+                        </div>
+                        <div class="icon">
+                            <img id="today-icon" src="" alt="Current weather" class="weather-icon">
+                        </div>
+                    </div>
+                    <p class="condition" id="today-condition">—</p>
+                    <div class="weather-details">
+                        <span class="detail-badge"><i class="fa-solid fa-droplet"></i> <span id="today-humidity">—</span>%</span>
+                        <span class="detail-badge"><i class="fa-solid fa-wind"></i> <span id="today-wind">—</span> km/h</span>
+                        <span class="detail-badge"><i class="fa-regular fa-compass"></i> <span id="today-dir">—</span></span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="forecast-card tomorrow glass-panel secondary-card">
+                <div class="card-header center">
+                    <div>
+                        <span class="day" id="tomorrow-day">—</span>
+                        <span class="date" id="tomorrow-date">—</span>
+                    </div>
+                </div>
+                <div class="card-body center">
+                    <div class="icon">
+                        <img id="tomorrow-icon" src="" alt="Tomorrow weather" class="weather-icon">
+                    </div>
+                    <div class="temp-group">
+                        <div class="max-temp"><span id="tomorrow-max">—</span><span class="degree-sym">°</span>C</div>
+                        <div class="min-temp"><span id="tomorrow-min">—</span><span class="degree-sym">°</span></div>
+                    </div>
+                    <p class="condition" id="tomorrow-condition">—</p>
+                </div>
+            </article>
+
+            <article class="forecast-card day-after glass-panel secondary-card">
+                <div class="card-header center">
+                    <div>
+                        <span class="day" id="day-after-day">—</span>
+                        <span class="date" id="day-after-date">—</span>
+                    </div>
+                </div>
+                <div class="card-body center">
+                    <div class="icon">
+                        <img id="day-after-icon" src="" alt="Day after weather" class="weather-icon">
+                    </div>
+                    <div class="temp-group">
+                        <div class="max-temp"><span id="day-after-max">—</span><span class="degree-sym">°</span>C</div>
+                        <div class="min-temp"><span id="day-after-min">—</span><span class="degree-sym">°</span></div>
+                    </div>
+                    <p class="condition" id="day-after-condition">—</p>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
