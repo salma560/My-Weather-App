@@ -2,36 +2,90 @@
 // Leave as YOUR_API_KEY_HERE to use the built-in fallback until you have a key
 const API_KEY = 'YOUR_API_KEY_HERE';
 const WEATHER_API_URL = 'https://api.weatherapi.com/v1/forecast.json';
+const WEATHER_API_SEARCH_URL = 'https://api.weatherapi.com/v1/search.json';
 const GEO_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
 
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 const forecastSection = document.getElementById('forecastSection');
+const autocompleteList = document.getElementById('autocompleteList');
 
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 let searchTimeout = null;
 let activeRequest = 0;
+let autocompleteRequest = 0;
+let activeSuggestionIndex = -1;
+let suggestions = [];
 
 searchBtn.addEventListener('click', () => {
     const location = searchInput.value.trim();
-    if (location) getWeather(location);
+    if (location) {
+        hideAutocomplete();
+        getWeather(location);
+    }
 });
 
 searchInput.addEventListener('keydown', (e) => {
+    if (!autocompleteList.hidden && suggestions.length) {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeSuggestionIndex = Math.min(activeSuggestionIndex + 1, suggestions.length - 1);
+            updateActiveSuggestion();
+            return;
+        }
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeSuggestionIndex = Math.max(activeSuggestionIndex - 1, 0);
+            updateActiveSuggestion();
+            return;
+        }
+
+        if (e.key === 'Escape') {
+            hideAutocomplete();
+            return;
+        }
+
+        if (e.key === 'Enter' && activeSuggestionIndex >= 0) {
+            e.preventDefault();
+            selectSuggestion(suggestions[activeSuggestionIndex]);
+            return;
+        }
+    }
+
     if (e.key === 'Enter') {
         const location = searchInput.value.trim();
-        if (location) getWeather(location);
+        if (location) {
+            hideAutocomplete();
+            getWeather(location);
+        }
     }
 });
 
 searchInput.addEventListener('input', () => {
     clearTimeout(searchTimeout);
-    const location = searchInput.value.trim();
-    if (location.length >= 3) {
-        searchTimeout = setTimeout(() => getWeather(location), 600);
+    const query = searchInput.value.trim();
+
+    if (query.length < 2) {
+        hideAutocomplete();
+        return;
+    }
+
+    searchTimeout = setTimeout(() => fetchSuggestions(query), 300);
+});
+
+searchInput.addEventListener('focus', () => {
+    if (suggestions.length && searchInput.value.trim().length >= 2) {
+        showAutocomplete();
+    }
+});
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrapper')) {
+        hideAutocomplete();
     }
 });
 
@@ -41,6 +95,124 @@ function setLoading(isLoading) {
     searchBtn.innerHTML = isLoading
         ? '<i class="fa-solid fa-spinner fa-spin"></i> Searching'
         : 'Search';
+}
+
+async function fetchSuggestions(query) {
+    const requestId = ++autocompleteRequest;
+
+    try {
+        const results = API_KEY !== 'YOUR_API_KEY_HERE'
+            ? await fetchWeatherAPISuggestions(query)
+            : await fetchOpenMeteoSuggestions(query);
+
+        if (requestId !== autocompleteRequest) return;
+
+        suggestions = results;
+        activeSuggestionIndex = -1;
+        renderSuggestions();
+    } catch (error) {
+        if (requestId !== autocompleteRequest) return;
+        console.error('Error fetching suggestions:', error);
+        hideAutocomplete();
+    }
+}
+
+async function fetchWeatherAPISuggestions(query) {
+    const res = await fetch(
+        `${WEATHER_API_SEARCH_URL}?key=${API_KEY}&q=${encodeURIComponent(query)}`
+    );
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw new Error(data.error?.message || 'Could not load suggestions.');
+    }
+
+    if (!Array.isArray(data) || !data.length) {
+        return [];
+    }
+
+    return data.slice(0, 6).map((place) => ({
+        label: place.region
+            ? `${place.name}, ${place.region}, ${place.country}`
+            : `${place.name}, ${place.country}`,
+        query: place.name
+    }));
+}
+
+async function fetchOpenMeteoSuggestions(query) {
+    const res = await fetch(
+        `${GEO_URL}?name=${encodeURIComponent(query)}&count=6&language=en&format=json`
+    );
+    const data = await res.json();
+
+    if (!data.results?.length) {
+        return [];
+    }
+
+    return data.results.map((place) => ({
+        label: place.admin1
+            ? `${place.name}, ${place.admin1}, ${place.country}`
+            : `${place.name}, ${place.country}`,
+        query: place.name
+    }));
+}
+
+function renderSuggestions() {
+    autocompleteList.innerHTML = '';
+
+    if (!suggestions.length) {
+        hideAutocomplete();
+        return;
+    }
+
+    suggestions.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'autocomplete-item';
+        li.setAttribute('role', 'option');
+        li.innerHTML = `<i class="fa-solid fa-location-dot"></i><span>${item.label}</span>`;
+        li.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            selectSuggestion(item);
+        });
+        li.addEventListener('mouseenter', () => {
+            activeSuggestionIndex = index;
+            updateActiveSuggestion();
+        });
+        autocompleteList.appendChild(li);
+    });
+
+    showAutocomplete();
+}
+
+function updateActiveSuggestion() {
+    const items = autocompleteList.querySelectorAll('.autocomplete-item');
+    items.forEach((item, index) => {
+        item.classList.toggle('active', index === activeSuggestionIndex);
+    });
+
+    if (activeSuggestionIndex >= 0 && items[activeSuggestionIndex]) {
+        searchInput.value = suggestions[activeSuggestionIndex].query;
+        items[activeSuggestionIndex].scrollIntoView({ block: 'nearest' });
+    }
+}
+
+function selectSuggestion(item) {
+    searchInput.value = item.query;
+    hideAutocomplete();
+    getWeather(item.query);
+}
+
+function showAutocomplete() {
+    autocompleteList.hidden = false;
+    searchInput.setAttribute('aria-expanded', 'true');
+}
+
+function hideAutocomplete() {
+    autocompleteList.hidden = true;
+    autocompleteList.innerHTML = '';
+    searchInput.setAttribute('aria-expanded', 'false');
+    activeSuggestionIndex = -1;
+    suggestions = [];
 }
 
 function formatDateFromParts(dayIndex, monthIndex, dayNum) {

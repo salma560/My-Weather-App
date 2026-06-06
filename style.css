@@ -133,6 +133,10 @@ body {
     margin: 0 auto 40px;
 }
 
+.search-wrapper {
+    position: relative;
+}
+
 .search-box {
     display: flex;
     align-items: center;
@@ -164,6 +168,49 @@ body {
 
 .search-box input::placeholder {
     color: var(--text-muted);
+}
+
+.autocomplete-list {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+    border-radius: 14px;
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 200;
+}
+
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.autocomplete-item i {
+    color: var(--primary);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background: rgba(79, 172, 254, 0.12);
+    color: var(--text-primary);
 }
 
 .btn-gradient {

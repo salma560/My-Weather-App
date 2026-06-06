@@ -27,10 +27,13 @@
 
     <main class="main-content container">
         <div class="search-container">
-            <div class="search-box glass-panel">
-                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" id="searchInput" placeholder="Enter the city" autocomplete="off">
-                <button type="button" id="searchBtn" class="btn-gradient">Search</button>
+            <div class="search-wrapper">
+                <div class="search-box glass-panel">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Enter the city" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="autocompleteList" aria-autocomplete="list">
+                    <button type="button" id="searchBtn" class="btn-gradient">Search</button>
+                </div>
+                <ul id="autocompleteList" class="autocomplete-list" role="listbox" hidden></ul>
             </div>
         </div>
 
